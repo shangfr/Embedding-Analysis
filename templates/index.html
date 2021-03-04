@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+    <head>
+        <meta charset="utf-8">
+		<title>文本挖掘-测试</title>
+		<link rel="stylesheet" href="../static/css/bootstrap.min.css"> 
+		<link rel="stylesheet" href="../static/css/bootstrap-table.min.css">
+    </head>
+    <body style="height: 100%; margin: 0">
+		<div class="container-fluid" style="height: 100%">
+			<div class="row clearfix">
+				<div class="col-md-12 column">
+					<nav class="navbar navbar-default navbar-inverse" role="navigation">
+						<div class="navbar-header">
+							 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1"> <span class="sr-only">Toggle navigation</span><span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span></button> <a class="navbar-brand" href="#">ShangFR</a>
+						</div>
+						
+						<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+							<ul class="nav navbar-nav">
+								<li class="active">
+									 <a href="#">Link</a>
+								</li>
+								<li>
+									 <a href="#">Link</a>
+								</li>
+								<li class="dropdown">
+									 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown<strong class="caret"></strong></a>
+									<ul class="dropdown-menu">
+										<li>
+											 <a href="#">Action</a>
+										</li>
+										<li>
+											 <a href="#">Another action</a>
+										</li>
+										<li>
+											 <a href="#">Something else here</a>
+										</li>
+										<li class="divider">
+										</li>
+										<li>
+											 <a href="#">Separated link</a>
+										</li>
+										<li class="divider">
+										</li>
+										<li>
+											 <a href="#">One more separated link</a>
+										</li>
+									</ul>
+								</li>
+							</ul>
+							<form class="navbar-form navbar-left" role="search">
+								<div class="form-group">
+									<input type="text" class="form-control" />
+								</div> <button type="submit" class="btn btn-default">Submit</button>
+							</form>
+							<ul class="nav navbar-nav navbar-right">
+								<li>
+									 <a href="#">Link</a>
+								</li>
+								<li class="dropdown">
+									 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown<strong class="caret"></strong></a>
+									<ul class="dropdown-menu">
+										<li>
+											 <a href="#">Action</a>
+										</li>
+										<li>
+											 <a href="#">Another action</a>
+										</li>
+										<li>
+											 <a href="#">Something else here</a>
+										</li>
+										<li class="divider">
+										</li>
+										<li>
+											 <a href="#">Separated link</a>
+										</li>
+									</ul>
+								</li>
+							</ul>
+						</div>
+						
+					</nav>
+				</div>
+			</div>
+			<div class="row clearfix" style="height: 100%">
+				<div class="col-md-4 column">
+					<form role="form" id="taskForm">
+						<div class="form-group">
+							<label for="name">政策文本</label>
+							<textarea type="text"  rows="10" class="form-control" id="policytext" 
+								   placeholder="请输入文本内容"></textarea>
+						</div>
+						<div class="form-group">
+							 <label for="exampleInputFile">文件选择</label><input type="file" id="InputFile" />
+							<p class="help-block">
+								请在指定的文件夹内选择txt文件
+							</p>
+						</div>
+						<button type="button" onclick="posttext()" class="btn btn-default">分析</button>
+					</form>
+				</div>
+				<div class="col-md-8 column" style="height: 100%">
+					<div class="tabbable" id="tabs-459515" style="height: 100%">
+					<ul class="nav nav-tabs">
+						<li class="active">
+							 <a href="#panel-925731" data-toggle="tab">图网络</a>
+						</li>
+						<li>
+							 <a href="#panel-506946" data-toggle="tab">词统计</a>
+						</li>
+					</ul>
+					<div class="tab-content" style="height: 100%">
+						<div class="tab-pane active" id="panel-925731" style="height: 100%">
+							<p>
+							 
+							</p>
+							<div id="echartscol" style="height: 80%"></div>
+						</div>
+						<div class="tab-pane" id="panel-506946">
+							<div class="row clearfix">
+								<div class="col-md-6 column">
+									<p> </p>
+									<div id='wordcloud' style="width:360px; height:400px"></div>
+								</div>
+								<div class="col-md-6 column">
+									<table id="table" 
+										data-toggle="table" 
+										data-flat="true" 
+										data-search="true" 
+										data-pagination="true"
+										data-page-size="6"
+										data-url="http://127.0.0.1:5000/api/v1.0/wordfrq">
+
+									  <thead>
+										<tr>
+										  <th data-field="name">词语</th>
+										  <th data-field="amount">词频</th>
+										</tr>
+									  </thead>
+									</table>								
+								</div>
+							</div>
+						</div>
+					</div>
+					</div>
+				</div>
+			</div>	 
+		</div>	
+		<script type="text/javascript" src="../static/js/jquery.min.js"></script>
+		
+		<script type="text/javascript" src="../static/js/bootstrap.min.js"></script>		
+		<script type="text/javascript" src="../static/js/bootstrap-table.js"></script>
+		<script type="text/javascript" src="../static/js/bootstrap-table-zh-CN.js"></script>
+		
+        <script type="text/javascript" src="../static/js/echarts.min.js"></script>
+		<script type="text/javascript" src='../static/js/echarts-wordcloud.js'></script>
+        <script type="text/javascript">
+				
+		var root_url = 'http://127.0.0.1:5000/api/v1.0/'
+
+		function showpolicy(graph){
+			myChart.hideLoading();
+			option = {
+				tooltip: {},
+				legend: [{
+					data: graph.data.categories.map(function (a) {
+						return a.name;
+					})
+				}],
+				series: [
+					{
+						name: '招商政策',
+						type: 'graph',
+						layout: 'none',
+						data: graph.data.nodes,
+						links: graph.data.links,
+						categories: graph.data.categories,
+						roam: true,
+						label: {
+							show: true,
+							position: 'right',
+							formatter: '{b}'
+						},
+						labelLayout: {
+							hideOverlap: true
+						},
+						scaleLimit: {
+							min: 0.4,
+							max: 2
+						},
+						lineStyle: {
+							color: 'source',
+							curveness: 0.3
+						}
+					}
+				]
+			};
+
+			myChart.setOption(option);
+		}
+
+		var dom = document.getElementById("echartscol");
+		var myChart = echarts.init(dom);
+		var app = {};
+		var option;
+
+		myChart.showLoading();
+		$.getJSON(root_url+'policy', function (graph) {
+		showpolicy(graph);
+		});
+
+		if (option && typeof option === 'object') {
+			myChart.setOption(option);
+		}
+	
+		function showwordcloud(){
+			$.getJSON(root_url+'wordfrq', function (datad) {
+				var wordFreqs = datad;
+				var wordFreqData = new Array();
+				for (var i = 0; i < wordFreqs.length; i++) {
+					var optiond = {name:wordFreqs[i].name, value:wordFreqs[i].amount};
+					wordFreqData.push(optiond);
+				}
+				//console.log(wordFreqData)
+				var chart = echarts.init(document.getElementById('wordcloud'));
+
+				var maskImage = new Image();
+
+				var option = {
+					series: [ {
+						type: 'wordCloud',
+						sizeRange: [10, 30],
+						rotationRange: [-45, 45],
+						rotationStep: 15,
+						gridSize: 5,
+						//shape: 'pentagon',
+						//maskImage: maskImage,
+						drawOutOfBound: false,
+						textStyle: {
+							color: function () {
+								return 'rgb(' + [
+									Math.round(Math.random() * 160),
+									Math.round(Math.random() * 160),
+									Math.round(Math.random() * 160)
+								].join(',') + ')';
+							}
+						},
+						left: 'center',
+                        top: 'center',
+                        right: null,
+                        bottom: null,
+                        width:'100%',
+                        height:'100%',
+						emphasis: {
+							textStyle: {
+								color: 'red'
+							}
+						},
+						data: wordFreqData,
+					} ]
+				};
+
+				chart.setOption(option);
+				//maskImage.onload = function () {
+				//	option.series[0].maskImage
+				//	chart.setOption(option);
+				//}
+
+				maskImage.src = 'static/picture/logo.png';
+				window.onresize = function () {
+					chart.resize();
+				}
+			});
+		}		
+		
+		showwordcloud();
+		
+		function showrefresh(data){
+			$('#table').bootstrapTable('refresh')
+			showwordcloud();
+			showpolicy(data);
+		  }
+
+		function posttext(){
+					var policyText = document.getElementById("policytext").value;
+					var inputFile = document.getElementById("InputFile").value;     // inputfile1是input的类名			
+					
+					$.ajax({
+					type : 'post',
+							url : root_url+'policy',
+							dataType : 'json',
+							headers: {
+								"Content-Type": "application/json;charset=utf-8"
+							},
+							contentType:'application/json; charset=utf-8',
+							data : JSON.stringify({policytext:policyText,file:inputFile}),
+							success : function(result) {
+								//$('#resText').empty();   //清空resText里面的所有内容
+								showrefresh(result);
+								console.log("data is :");
+							},
+							error : function(){
+								alert("错误！！");
+							}
+					   })
+				}
+
+
+
+        </script>
+    </body>
+</html>
+    
