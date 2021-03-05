@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body style="height: 100%; margin: 0">
+        <div id="container" style="height: 100%"></div>
+
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+		<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+        <script type="text/javascript">
+var dom = document.getElementById("container");
+var myChart = echarts.init(dom);
+var app = {};
+var option;
+
+
+
+myChart.showLoading();
+$.getJSON('http://127.0.0.1:5000/api/v1.0/policy', function (graph) {
+    myChart.hideLoading();
+
+    option = {
+        tooltip: {},
+        legend: [{
+            data: graph.data.categories.map(function (a) {
+                return a.name;
+            })
+        }],
+        series: [
+            {
+                name: '招商政策',
+                type: 'graph',
+                layout: 'none',
+                data: graph.data.nodes,
+                links: graph.data.links,
+                categories: graph.data.categories,
+                roam: true,
+                label: {
+                    show: true,
+                    position: 'right',
+                    formatter: '{b}'
+                },
+                labelLayout: {
+                    hideOverlap: true
+                },
+                scaleLimit: {
+                    min: 0.4,
+                    max: 2
+                },
+                lineStyle: {
+                    color: 'source',
+                    curveness: 0.3
+                }
+            }
+        ]
+    };
+
+    myChart.setOption(option);
+});
+
+if (option && typeof option === 'object') {
+    myChart.setOption(option);
+}
+
+        </script>
+    </body>
+</html>
+    

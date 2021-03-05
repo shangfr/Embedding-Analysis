@@ -11,12 +11,21 @@ from sklearn import cluster, covariance, manifold
 from jieba import analyse,cut
 import spacy
 nlp = spacy.load('zh_core_web_sm')
+
+from paddlenlp.embeddings import TokenEmbedding
+wordemb = TokenEmbedding("w2v.baidu_encyclopedia.target.word-word.dim300")
+
 '''
-sentence：  待提取关键词的文本
+sentence：  待分析文本
+embedding:  词向量模型选择
+cor：       相关性度量方式
+xy:         降维算法选择
+cluster:    聚类算法选择
 topK：      返回关键词的数量，重要性从高到低排序
 withWeight：是否同时返回每个关键词的权重
 allowPOS：  词性过滤，为空表示不过滤，若提供则仅返回符合词性要求的关键词
             默认为('ns', 'n', 'vn', 'v'),即仅提取地名、名词、动名词、动词
+
 '''
 
 stopwords=[]
@@ -24,7 +33,7 @@ for word in open('static/dict/chineseStopWords.txt','r', encoding='utf-8'):
     stopwords.append(word.strip())
     
     
-def word_cut(content):
+def word_cut(content,topK):
     words_list = cut(content, cut_all=False)
      
     counts = {}             #创建计数器 --- 字典类型
@@ -38,27 +47,7 @@ def word_cut(content):
     with open(filename,'w', encoding='utf-8') as file_obj:
         json.dump(counts,file_obj,ensure_ascii=False)
 
-
-
-def get_word_net(file_name='招商政策01.txt',content='',topK = 20):
-    
-    file_name='test_content/'+file_name
-    if content=='':        
-        with open(file_name, 'rb') as file:
-            content = file.read()
-        content = content.decode(encoding = "utf-8").replace(" ", "").replace("\r", "").replace("\n", "")
-    else:
-        content = content.replace(" ", "").replace("\r", "").replace("\n", "")
-    word_cut(content)
-    keywords = analyse.extract_tags(content,topK=topK, withWeight=True, allowPOS=())#list
-    keydic={}
-    keydic['keywords'] = [(x[0],x[1]*100) for x in keywords]
-    
-    filename='keywords/keywords.json'
-    with open(filename,'w', encoding='utf-8') as file_obj:
-        json.dump(keydic,file_obj,ensure_ascii=False)
-        
-    
+    keywords = analyse.extract_tags(content,topK=topK, withWeight=True, allowPOS=())#list   
     # 基于TextRank算法进行关键词抽取
     #textrank=analyse.textrank
     #keywords=textrank(text)#list
@@ -66,20 +55,60 @@ def get_word_net(file_name='招商政策01.txt',content='',topK = 20):
     # 输出抽取出的关键词
     #for keyword in keywords:
     #    print(keyword[0],keyword[1])#分别为关键词和相应的权重
-    word2net_data = word2net(keywords,topK)
+    keydic={}
+    keydic['keywords'] = [(x[0],x[1]*100) for x in keywords]
+    
+    filename='keywords/keywords.json'
+    with open(filename,'w', encoding='utf-8') as file_obj:
+        json.dump(keydic,file_obj,ensure_ascii=False)
+        
+    return keywords
+
+
+def get_word_net(postdata):
+    
+    content=postdata['policytext']
+    upload_path = postdata['file']
+    topK = int(postdata['topK'])
+    
+    if content == '':
+        if upload_path == '':
+            file_name='test_content/招商政策01.txt'
+        else:
+            file_name='test_content/'+upload_path.split('\\')[2]
+            
+        with open(file_name, 'rb') as file:
+            content = file.read()
+        content = content.decode(encoding = "utf-8").replace(" ", "").replace("\r", "").replace("\n", "")
+       
+    else:
+        content = content.replace(" ", "").replace("\r", "").replace("\n", "")
+
+        
+    keywords = word_cut(content,topK)
+
+    word2net_data = word2net(keywords,topK,postdata)
     
     return word2net_data
-        
-def word2net(keywords,topK):      
+
+def word2net(keywords,topK,postdata):      
     
     symbols = [x[0] for x in keywords]
     symbolSize = [round(x[1]*50,2) for x in keywords]
+    print(type(postdata['embedding']))
+    embedding = postdata['embedding']
     # 利用语料训练模型
     X = []
-    for string in symbols:
-        doc_vector = nlp(string).vector
-        X.append(doc_vector)
     
+    if embedding == 'Paddle':
+        for string in symbols:
+            doc_vector = wordemb.search(string)[0]
+            X.append(doc_vector)
+    else:  
+        for string in symbols:
+            doc_vector = nlp(string).vector
+            X.append(doc_vector)        
+  
     X = np.array(X).T  
     X /= X.std(axis=0)
        
@@ -106,18 +135,27 @@ def word2net(keywords,topK):
     # use a large number of neighbors to capture the large-scale structure.
     node_position_model = manifold.LocallyLinearEmbedding(n_components=2, eigen_solver='dense', n_neighbors=6)
     
-    embedding = node_position_model.fit_transform(X.T).T
+    xy = node_position_model.fit_transform(X.T).T
     
-    # Display a graph of the partial correlations
-    partial_correlations = edge_model.precision_.copy()
-    d = 1 / np.sqrt(np.diag(partial_correlations))
-    partial_correlations *= d
-    partial_correlations *= d[:, np.newaxis]
-    non_zero = (np.abs(np.triu(partial_correlations, k=1)) > 0.02)
+    corr = postdata['cor']
+    if corr == 'Cor':
+        cov_correlations = edge_model.covariance_.copy()
+        d = 1 / np.sqrt(np.diag(cov_correlations))
+        non_zero = (np.abs(np.triu(cov_correlations, k=1)) > 0.5)        
+    else:
+        # Display a graph of the partial correlations
+        partial_correlations = edge_model.precision_.copy()
+        d = 1 / np.sqrt(np.diag(partial_correlations))
+        partial_correlations *= d
+        partial_correlations *= d[:, np.newaxis]
+        non_zero = (np.abs(np.triu(partial_correlations, k=1)) > 0.02)
+        #values = np.abs(partial_correlations[non_zero])
+    
+
     
     df_nodes = pd.DataFrame({'id':range(topK),
                             'name':names,'symbolSize':symbolSize,
-                            'x':embedding[0], 'y':embedding[1],
+                            'x':xy[0], 'y':xy[1],
                             'value':d,'category':labels})
     
     df_nodes['id'] = df_nodes['id'].astype('str')
@@ -127,8 +165,7 @@ def word2net(keywords,topK):
     
     start_idx, end_idx = np.where(non_zero)
     links = [{'source':str(start),'target':str(stop)} for start, stop in zip(start_idx, end_idx)]
-    values = np.abs(partial_correlations[non_zero])
-    
+
     
     json_data = {}
     json_data['nodes'] = nodes

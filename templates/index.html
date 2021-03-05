@@ -96,6 +96,28 @@
 								请在指定的文件夹内选择txt文件
 							</p>
 						</div>
+						<div class="row">
+						  <div class="col-md-5 mb-3">
+							<label for="country">TokenEmbedding</label>
+							<select class="custom-select d-block w-100" id="embedding" required="">
+							  <option value="Spacy">Choose...</option>
+							  <option>Spacy</option>
+							  <option>Paddle</option>
+							</select>
+						  </div>
+						  <div class="col-md-4 mb-3">
+							<label for="state">Correlations</label>
+							<select class="custom-select d-block w-100" id="cor" placeholder="pCor" required="">
+							  <option value="pCor">Choose...</option>
+							  <option>Cor</option>
+							  <option>pCor</option>
+							</select>
+						  </div>
+						  <div class="col-md-3 mb-3">
+							<label for="zip">topK</label>
+							<input type="number" class="form-control" id="topK" value="20" required="">
+						  </div>
+						</div>
 						<button type="button" onclick="posttext()" class="btn btn-default">分析</button>
 					</form>
 				</div>
@@ -205,7 +227,7 @@
 		var option;
 
 		myChart.showLoading();
-		$.getJSON(root_url+'policy', function (graph) {
+		$.getJSON(root_url+'wordnet', function (graph) {
 		showpolicy(graph);
 		});
 
@@ -283,17 +305,21 @@
 
 		function posttext(){
 					var policyText = document.getElementById("policytext").value;
-					var inputFile = document.getElementById("InputFile").value;     // inputfile1是input的类名			
+					var inputFile = document.getElementById("InputFile").value;     
+					var embedding = document.getElementById("embedding").value;
+					var cor = document.getElementById("cor").value;	
+					var topK = document.getElementById("topK").value;
+
 					
 					$.ajax({
 					type : 'post',
-							url : root_url+'policy',
+							url : root_url+'wordnet',
 							dataType : 'json',
 							headers: {
 								"Content-Type": "application/json;charset=utf-8"
 							},
 							contentType:'application/json; charset=utf-8',
-							data : JSON.stringify({policytext:policyText,file:inputFile}),
+							data : JSON.stringify({policytext:policyText,file:inputFile,embedding:embedding,cor:cor,topK:topK}),
 							success : function(result) {
 								//$('#resText').empty();   //清空resText里面的所有内容
 								showrefresh(result);
