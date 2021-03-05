@@ -1,6 +1,6 @@
 #  NLP分析工具
 
-**NLP分析工具**是一款基于NLP开源算法、模型库（jieba、spacy、paddlenlp），开发上前后端结合flask_api+js+bootstrap+echarts，通过机器学习算法（聚类、主成分分析、图网络GraphicalLasso）实现文本数据词语之间的关联性分析。涉及参数如下：
+**NLP分析工具**是一款基于NLP开源算法和模型库（jieba、spacy、paddlenlp）对文本数据进行向量化，然后通过机器学习算法（聚类、主成分分析、图网络GraphicalLasso）对文本数据词向量之间进行关联性分析的小工具。前后端开发上用到了flask_api+js+bootstrap+echarts等组件，小工具涉及参数如下：
 
 - **sentence** ：待分析文本，可编辑或上传txt文件
 - **embedding** ：词向量模型选择（开源的词向量库）
