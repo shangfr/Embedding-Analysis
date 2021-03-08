@@ -8,7 +8,7 @@ import os
 import json
 from flask import Flask, jsonify,render_template,request
 
-from word_net import get_word_net
+from word_net import WordNet
 #from flask_cors import CORS
 
 app = Flask(__name__)
@@ -49,7 +49,8 @@ def get_policy():
         #else:
         elif request.method == 'POST':
             postdata = json.loads(request.get_data(as_text=True))
-            json_data = get_word_net(postdata)
+            word_net = WordNet(postdata)
+            json_data = word_net.get_word_net()
             return jsonify({'data': json_data})       
 
 if __name__ == '__main__':
