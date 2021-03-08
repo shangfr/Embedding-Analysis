@@ -1,5 +1,0 @@
-{
-  "use_jieba":false,
-  "use_pkuseg":true,
-  "require_pkuseg":true
-}
