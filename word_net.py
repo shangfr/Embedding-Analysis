@@ -15,18 +15,7 @@ nlp = spacy.load('zh_core_web_sm')
 from paddlenlp.embeddings import TokenEmbedding
 wordemb = TokenEmbedding("w2v.baidu_encyclopedia.target.word-word.dim300")
 
-'''
-sentence：  待分析文本
-embedding:  词向量模型选择
-cor：       相关性度量方式
-xy:         降维算法选择
-cluster:    聚类算法选择
-topK：      返回关键词的数量，重要性从高到低排序
-withWeight：是否同时返回每个关键词的权重
-allowPOS：  词性过滤，为空表示不过滤，若提供则仅返回符合词性要求的关键词
-            默认为('ns', 'n', 'vn', 'v'),即仅提取地名、名词、动名词、动词
 
-'''
 
 stopwords=[]
 for word in open('static/dict/chineseStopWords.txt','r', encoding='utf-8'):
@@ -35,6 +24,18 @@ for word in open('static/dict/chineseStopWords.txt','r', encoding='utf-8'):
 
 
 class WordNet:
+    '''
+    sentence：  待分析文本
+    embedding:  词向量模型选择
+    cor：       相关性度量方式
+    xy:         降维算法选择
+    cluster:    聚类算法选择
+    topK：      返回关键词的数量，重要性从高到低排序
+    withWeight：是否同时返回每个关键词的权重
+    allowPOS：  词性过滤，为空表示不过滤，若提供则仅返回符合词性要求的关键词
+                默认为('ns', 'n', 'vn', 'v'),即仅提取地名、名词、动名词、动词
+    
+    '''
     def __init__(self, postdata):
         self.content=postdata['policytext']
         self.upload_path = postdata['file']
