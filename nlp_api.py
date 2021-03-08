@@ -15,28 +15,12 @@ app = Flask(__name__)
 #CORS(app, supports_credentials=True)
 app.config['JSON_AS_ASCII'] = False
 
+
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
-    
-    
-@app.route('/api/v1.0/policy', methods=['GET','POST'])
-def get_policy():
-        if request.method == 'GET':
-            file_name = 'keywords/policy.json'
-            with open(file_name,'r',encoding='utf8')as fp:
-                json_data = json.load(fp)
-            return jsonify({'data': json_data})
-        #else:
-        elif request.method == 'POST':
-            postdata = json.loads(request.get_data(as_text=True))
-            upload_path = postdata['file']
-            if upload_path == '':
-                json_data = get_word_net(content=postdata['policytext'])
-            else:
-                upload_path = upload_path.split('\\')[2]
-                json_data = get_word_net(file_name=upload_path)
-            return jsonify({'data': json_data})
 
 @app.route('/api/v1.0/keywords', methods=['GET','POST'])
 def get_keydic():
@@ -54,7 +38,19 @@ def get_wordfrq():
                 json_data = json.load(fp)
             return jsonify(json_data)
         
-        
+    
+@app.route('/api/v1.0/wordnet', methods=['GET','POST'])
+def get_policy():
+        if request.method == 'GET':
+            file_name = 'keywords/policy.json'
+            with open(file_name,'r',encoding='utf8')as fp:
+                json_data = json.load(fp)
+            return jsonify({'data': json_data})
+        #else:
+        elif request.method == 'POST':
+            postdata = json.loads(request.get_data(as_text=True))
+            json_data = get_word_net(postdata)
+            return jsonify({'data': json_data})       
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
