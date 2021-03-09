@@ -10,17 +10,23 @@ import pandas as pd
 from sklearn import cluster, covariance, manifold
 from jieba import analyse,cut
 import spacy
-nlp = spacy.load('zh_core_web_sm')
-
 from paddlenlp.embeddings import TokenEmbedding
-wordemb = TokenEmbedding("w2v.baidu_encyclopedia.target.word-word.dim300")
 
 
+def load_model():
 
-stopwords=[]
-for word in open('static/dict/chineseStopWords.txt','r', encoding='utf-8'):
-    stopwords.append(word.strip())
+    global nlp,wordemb,stopwords
+    nlp = spacy.load('zh_core_web_sm')
+    wordemb = TokenEmbedding("w2v.baidu_encyclopedia.target.word-word.dim300")
 
+    stopwords=[]
+    for word in open('static/dict/chineseStopWords.txt','r', encoding='utf-8'):
+        stopwords.append(word.strip())
+        
+    print('模型加载完成')
+
+
+load_model()
 
 
 class WordNet:

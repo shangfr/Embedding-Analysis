@@ -6,9 +6,10 @@ Created on Thu Feb 25 15:10:22 2021
 """
 import os
 import json
-from flask import Flask, jsonify,render_template,request
-
 from word_net import WordNet
+from flask import Flask, jsonify,render_template,request
+from gevent import pywsgi
+
 #from flask_cors import CORS
 
 app = Flask(__name__)
@@ -54,4 +55,8 @@ def get_policy():
             return jsonify({'data': json_data})       
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+
+    #app.run(debug=True, host='0.0.0.0', port=5000)
+    server = pywsgi.WSGIServer(('0.0.0.0', 5000), app)
+    server.serve_forever()
+
