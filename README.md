@@ -16,3 +16,28 @@
 ![avatar](/static/picture/pic02.jpg)
 
 ![avatar](/static/picture/pic03.jpg)
+
+
+### 代码块
+``` python
+
+from word_net import WordNet
+# 载入词向量模型
+WordNet.load_model()
+# 待分析文本
+content = ''
+
+# 分词，获取关键词
+keywords = WordNet.word_cut(content,10)
+
+# 词向量化
+symbols,symbolSize,X = WordNet.word2vec(keywords,embedding = 'Spacy')
+# 词向量矩阵转换--相关系数矩阵---偏相关系数矩阵---获取边
+non_zero,d,cov_correlations = WordNet.x2cor(X)    
+# 相关系数矩阵-聚类-获取类别标签
+labels,categories = WordNet.apCluster(symbols,cov_correlations)
+
+# 词向量矩阵-降维-可视化
+xy = WordNet.xyDimension(X)
+  
+```

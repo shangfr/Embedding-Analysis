@@ -16,7 +16,7 @@ app = Flask(__name__)
 #CORS(app, supports_credentials=True)
 app.config['JSON_AS_ASCII'] = False
 
-
+WordNet.load_model()
 
 
 @app.route('/')
@@ -51,7 +51,7 @@ def get_policy():
         elif request.method == 'POST':
             postdata = json.loads(request.get_data(as_text=True))
             word_net = WordNet(postdata)
-            json_data = word_net.get_word_net()
+            json_data = word_net.word2net()
             return jsonify({'data': json_data})       
 
 if __name__ == '__main__':
