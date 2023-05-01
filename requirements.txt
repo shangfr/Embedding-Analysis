@@ -1,11 +1,11 @@
-﻿blis==0.7.4
+blis==0.7.4
 catalogue==1.0.0
 certifi==2022.12.7
 chardet==4.0.0
 click==7.1.2
 cymem==2.0.5
 Cython==0.29.22
-Flask==1.1.2
+Flask==2.3.2
 idna==2.10
 itsdangerous==1.1.0
 jieba==0.42.1
