@@ -37,7 +37,7 @@ thinc==7.4.5
 threadpoolctl==2.1.0
 tqdm==4.58.0
 typer==0.3.2
-urllib3==1.26.4
+urllib3==1.26.5
 wasabi==0.8.2
 Werkzeug==2.2.3
 wincertstore==0.2
